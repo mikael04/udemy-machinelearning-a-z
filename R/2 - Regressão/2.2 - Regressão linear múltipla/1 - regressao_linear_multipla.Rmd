@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r results = 'hide', warning=FALSE, message=FALSE}
 # 0. Bibliotecas e scripts base ----
 library(dplyr)
-require(ggplot2)
+require(ggplot)
 
 ```
 ## 1. Leitura e manipulação da base
@@ -25,7 +25,7 @@ require(ggplot2)
 df <- read.csv("50_Startups.csv")
 ```
 
-### 1.2
+### 1.2 Variavel dependente
 ```{r results = 'hide', warning=FALSE, message=FALSE}
 ## variavel dependente
 unique_y <- unique(df$State)
@@ -60,15 +60,18 @@ test_set <- subset(df, split == F)
 ### 2.3 Regresão linear ----
 
 ```{r results = 'hide', warning=FALSE, message=FALSE}
-regressor <- lm(formula = Salary ~ YearsExperience, training_set)
+# regressor <- lm(formula = Profit ~ R.D.Spend + Administration + Markting.Spend + State, training_set)
+regressor <- lm(formula = Profit ~ ., training_set)
+summary(regressor)
 
 ## 2.4 Predição no grupo de teste ----
 y_pred <- predict(regressor, newdata = test_set)
+predicted <- ncol(test_set) + 1
+test_set[,predicted] = y_pred
 
-test_set[,3] = y_pred
-
+column_predicted <- paste0("V", predicted)
 test_set <- test_set |> 
-  dplyr::rename(`Salary(y)` = Salary, `Salary(yp)` = V3)
+  dplyr::rename(Profit_predicted = !!as.name(column_predicted))
 ```
 
 ### 2.5 Gráficos dedo modelo ----
@@ -76,28 +79,30 @@ test_set <- test_set |>
 ```{r results = 'hide', warning=FALSE, message=FALSE}
 
 plot <- ggplot2::ggplot(data = training_set) +
-  geom_point(aes(x = YearsExperience, y = Salary),
+  geom_point(aes(x = `R.D.Spend`, y = Profit),
              colour = 'red') +
-  geom_line(data = training_set, aes(x = YearsExperience,
+  geom_line(data = training_set, aes(x = `R.D.Spend`,
                                      y = predict(regressor, newdata = training_set)),
             color = 'blue') +
   scale_y_continuous(labels = scales::label_number_si()) +
-  xlab('Anos de experiência') +
-  ylab('Salário') +
-  ggtitle("Salário vs Experiência (Regressão linear para base de treino)") +
+  xlab('Gasto em P&D') +
+  ylab('Lucro') +
+  ggtitle("Lucro de acordo com gasto em pesquisa") +
   theme_minimal()
 
 plot
 
 plot_test <- ggplot2::ggplot(data = test_set) +
-  geom_point(aes(x = YearsExperience, y = `Salary(y)`),
+  geom_point(aes(x = `R.D.Spend`, y = Profit),
              colour = 'red') +
-  geom_line(data = training_set, aes(x = YearsExperience,
+  geom_line(data = training_set, aes(x = `R.D.Spend`,
                                      y = predict(regressor, newdata = training_set)),
             color = 'blue') + 
   scale_y_continuous(labels = scales::label_number_si()) +
-  theme(axis.title.x = 'Anos de experiência', axis.title.y = 'Salário', ) +
-  ggtitle("Salário vs Experiência (Regressão linear para base de teste)") +
+  theme(axis.title.x = 'Gasto em P&D', axis.title.y = 'Lucro', ) +
+  ggtitle("Lucro de acordo com gasto em pesquisa") +
+  xlab('Gasto em P&D') +
+  ylab('Lucro') +
   theme_minimal()
   
 plot_test
