@@ -4,7 +4,7 @@
 # 0. Bibliotecas e scripts base ----
 library(dplyr)
 require(ggplot2)
-library(e1071)
+library(rpart)
 
 # 1. Leitura e manipulação da base ----
 
@@ -38,58 +38,29 @@ df_aux <- df[,2:3]
 # test_set[,2:3] <- scale(test_set[,2:3])
 
 ## 2.3.1 Modelo utilizado ----
-### neste caso, SVR (support vector regression)
+### neste caso, Decision Tree Regressor
 
-# regressor <- lm(formula = Profit ~ R.D.Spend + Administration + Markting.Spend + State, training_set)
-regressor <- svm(formula = Salary ~ ., data = df_aux,
-                 type = 'eps-regression',
-                 kernel = 'radial') ## Assim colocamos todas as variáveis
+regressor <- rpart(formula = Salary ~ ., data = df_aux,
+                   control = rpart.control(minsplit = 1)) ## Assim colocamos todas as variáveis
 summary(regressor)
-# 
-# ## 2.3.2 Regresão polinomial ----
-# df_aux$Level2 <- df_aux$Level^2
-# df_aux$Level3 <- df_aux$Level^3
-# df_aux$Level4 <- df_aux$Level^4
-# regressor_poli <- lm(formula = Salary ~ ., df_aux) ## Assim colocamos todas as variáveis
-# summary(regressor_poli)
 
 
 ### 3 Gráficos do modelo linear ----
+df_X_grid <- as.data.frame(seq(min(df_aux$Level), max(df_aux$Level), by = 0.01))
+colnames(df_X_grid) <- "Level"
+
+predict(regressor, newdata = data.frame(df_X_grid))
 plot1 <- ggplot2::ggplot() +
   geom_point(data = df_aux, aes(x = `Level`, y = Salary),
              colour = 'red') +
-  geom_line(data = df_aux,
-            aes(x = `Level`,
-                y = predict(regressor, newdata = df_aux)),
+  geom_line(data = df_X_grid,
+            aes(x = Level,
+                y = predict(regressor, newdata = df_X_grid)),
             color = 'blue') +
   scale_y_continuous(labels = scales::label_number_si()) +
   xlab('') +
   ylab('Salário') +
-  ggtitle("Salário de acordo com cargo") +
-  theme_minimal()
-
-plot1
-### 3 Gráficos do modelo linear + modelo polinomial ----
-# x_grid_l1 <- seq(min(df_aux$Level), max(df_aux$Level), 0.1)
-plot1 <- ggplot2::ggplot() +
-  geom_point(data = df_aux,
-             aes(x = `Level`, y = Salary),
-             colour = 'red') +
-  geom_line(data = df_aux,
-            aes(x = `Level`,
-                y = predict(regressor_lin, newdata = df_aux)),
-            color = 'blue') +
-  # geom_line(data = df_aux,
-  #           aes(x = `x_grid`,
-  #               y = predict(regressor_poli, newdata = data.frame(Level = x_grid))),
-  #           color = 'green') +
-  geom_line(data = df_aux, aes(x = `Level`,
-                               y = predict(regressor_poli, newdata = df_aux)),
-            color = 'green') +
-  scale_y_continuous(labels = scales::label_number_si()) +
-  xlab('') +
-  ylab('Salário') +
-  ggtitle("Salário de acordo com cargo") +
+  ggtitle("Salário de acordo com cargo (Decision Tree Regression)") +
   theme_minimal()
 
 plot1

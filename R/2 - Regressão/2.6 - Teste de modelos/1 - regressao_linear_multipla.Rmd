@@ -1,0 +1,109 @@
+---
+title: "Regressão linear múltipla"
+author: "Mikael"
+date: '2022-04-28'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 0 Leitura de bibliotecas e da base
+
+```{r results = 'hide', warning=FALSE, message=FALSE}
+# 0. Bibliotecas e scripts base ----
+library(dplyr)
+require(ggplot)
+
+```
+## 1. Leitura e manipulação da base
+
+### 1.1 Leitura
+```{r results = 'hide', warning=FALSE, message=FALSE}
+
+df <- read.csv("50_Startups.csv")
+```
+
+### 1.2 Variavel dependente
+```{r results = 'hide', warning=FALSE, message=FALSE}
+## variavel dependente
+unique_y <- unique(df$State)
+df$State = factor(df$State,
+                  levels = unique_y,
+                  # levels = c("France", 'Spain', 'Germany'),
+                  labels = 1:(length(unique_y)))
+```
+
+## 2 Criando modelo
+
+### 2.1 Divisão de treino e teste
+
+```{r results = 'hide', warning=FALSE, message=FALSE}
+
+library(caTools)
+
+set.seed(seed = 123)
+
+split = sample.split(df$Profit, SplitRatio = .8)
+training_set <- subset(df, split == TRUE)
+test_set <- subset(df, split == F)
+```
+
+### 2.2 Featuring scale - Adaptando escalas
+
+```{r results = 'hide', warning=FALSE, message=FALSE}
+# training_set[,2:3] <- scale(training_set[,2:3])
+# test_set[,2:3] <- scale(test_set[,2:3])
+```
+
+### 2.3 Regresão linear ----
+
+```{r results = 'hide', warning=FALSE, message=FALSE}
+# regressor <- lm(formula = Profit ~ R.D.Spend + Administration + Markting.Spend + State, training_set)
+regressor <- lm(formula = Profit ~ ., training_set)
+summary(regressor)
+
+## 2.4 Predição no grupo de teste ----
+y_pred <- predict(regressor, newdata = test_set)
+predicted <- ncol(test_set) + 1
+test_set[,predicted] = y_pred
+
+column_predicted <- paste0("V", predicted)
+test_set <- test_set |> 
+  dplyr::rename(Profit_predicted = !!as.name(column_predicted))
+```
+
+### 2.5 Gráficos dedo modelo ----
+
+```{r results = 'hide', warning=FALSE, message=FALSE}
+
+plot <- ggplot2::ggplot(data = training_set) +
+  geom_point(aes(x = `R.D.Spend`, y = Profit),
+             colour = 'red') +
+  geom_line(data = training_set, aes(x = `R.D.Spend`,
+                                     y = predict(regressor, newdata = training_set)),
+            color = 'blue') +
+  scale_y_continuous(labels = scales::label_number_si()) +
+  xlab('Gasto em P&D') +
+  ylab('Lucro') +
+  ggtitle("Lucro de acordo com gasto em pesquisa") +
+  theme_minimal()
+
+plot
+
+plot_test <- ggplot2::ggplot(data = test_set) +
+  geom_point(aes(x = `R.D.Spend`, y = Profit),
+             colour = 'red') +
+  geom_line(data = training_set, aes(x = `R.D.Spend`,
+                                     y = predict(regressor, newdata = training_set)),
+            color = 'blue') + 
+  scale_y_continuous(labels = scales::label_number_si()) +
+  theme(axis.title.x = 'Gasto em P&D', axis.title.y = 'Lucro', ) +
+  ggtitle("Lucro de acordo com gasto em pesquisa") +
+  xlab('Gasto em P&D') +
+  ylab('Lucro') +
+  theme_minimal()
+  
+plot_test
+```
