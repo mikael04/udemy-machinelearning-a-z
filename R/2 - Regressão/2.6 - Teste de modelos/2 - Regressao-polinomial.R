@@ -39,6 +39,8 @@ regressor_lin <- lm(formula = Salary ~ ., training_set) ## Assim colocamos todas
 summary(regressor_lin)
 
 ## 2.3.2 Regresão polinomial ----
+# regressor_poli2 <- lm(formula = Salary ~ polym(Level), df_reg) ## Assim colocamos todas as variáveis
+# summary(regressor_poli2)
 df_reg$Level2 <- df_reg$Level^2
 df_reg$Level3 <- df_reg$Level^3
 df_reg$Level4 <- df_reg$Level^4

@@ -8,7 +8,7 @@ library(e1071)
 
 # 1. Leitura e manipulação da base ----
 
-df <- read.csv("material/Machine Learning A-Z (Codes and Datasets)/Part 2 - Regression/Section 7 - Support Vector Regression (SVR)/R/Position_Salaries.csv")
+df <- read.csv("R/2 - Regressão/2.3 - Regressão linear polinomial/Position_Salaries.csv")
 df_aux <- df[,2:3]
 
 ## 1.1 Encoding (variavel dependente, X) ----
