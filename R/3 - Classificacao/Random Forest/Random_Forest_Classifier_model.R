@@ -24,42 +24,44 @@ training_set[, 1:2] = scale(training_set[,1:2])
 test_set[,1:2] = scale(test_set[,1:2])
 
 # 2. Modelos ----
+# 2.1 Random Forest Classifier ----
 
-classifier_logReg = glm(formula = Purchased ~., family = binomial,
-                        data = training_set)
-summary(classifier_logReg)
+classifier = randomForest::randomForest(formula = Purchased ~.,
+                                        data = training_set,
+                                        ntree = 10)
+summary(classifier)
 
-### 2.1 Predição no grupo de teste ----
-y_pred_logReg <- round(predict(classifier_logReg, type = 'response', newdata = test_set[-3]))
+## 2.2 Predição no grupo de teste ----
+y_pred <- predict(classifier, newdata = test_set[-3], type = 'class')
 predicted <- ncol(test_set) + 1
-# test_set[,predicted] = y_pred_logReg
+# test_set[,predicted] = y_pred
 
 column_predicted <- paste0("V", predicted)
 predicted_column_name <- "Pred_Purchased"
 test_set_ren <- test_set
-test_set_ren[, predicted] <- y_pred_logReg
+test_set_ren[, predicted] <- y_pred
 
 colnames(test_set_ren)[4] <- predicted_column_name
 
-### Fazendo a matrix de confusão
-cm_table <- test_set_full[, -2:-1]
-cm = table(test_set[,3], y_pred_logReg)
-cm
+## 2.3 Resultados ----
 
+### 2.3.1 Fazendo a matrix de confusão
+# cm = table(test_set[,3], y_pred)
+# cm
 ## Matrix de confusao e mais algumas medidas avaliando performance do modelo
-caret::confusionMatrix(test_set[,3], as.factor(y_pred_logReg))
+caret::confusionMatrix(test_set[,3], y_pred)
 
-# Visualizing the training set results
-library('Rfast')
+### 2.3.2 Visualizando resultados
+#### Usando set de treino
+# library('Rfast')
 set  = training_set
 X1 = seq(min(set[, 1]) -1, max(set[, 1]) + 1, by = 0.01)
 X2 = seq(min(set[, 2]) -1, max(set[, 2]) + 1, by = 0.01)
 grid_set = expand.grid(X1, X2)
 colnames(grid_set) = c('Age', 'EstimatedSalary')
-prob_set = predict(classifier_logReg, type = 'response', newdata = grid_set)
-y_grid = ifelse(prob_set > 0.5, 1, 0)
+y_grid = predict(classifier, newdata = grid_set, type = 'class')
 plot(set[, -3],
-     main = 'SVM (Training Set)',
+     main = 'Random Forest Classifier (Training Set)',
      xlab = 'Age',
      ylab = 'Estimated Salary',
      xlim = range(X1),
@@ -69,17 +71,16 @@ contour(X1, X2, matrix(as.numeric(y_grid),length(X1), length(X2)), add = TRUE)
 points(grid_set, pch = '.', col = ifelse(y_grid==1, 'springgreen3', 'tomato') )
 points(set, pch = 21, bg = ifelse(set[, 3]== 1, 'green4', 'red3'))
 
-# Visualizing the test set results
-library('Rfast')
+#### Usando set de teste
+# library('Rfast')
 set  = test_set
 X1 = seq(min(set[, 1]) -1, max(set[, 1]) + 1, by = 0.01)
 X2 = seq(min(set[, 2]) -1, max(set[, 2]) + 1, by = 0.01)
 grid_set = expand.grid(X1, X2)
 colnames(grid_set) = c('Age', 'EstimatedSalary')
-prob_set = predict(classifier_logReg, type = 'response', newdata = grid_set)
-y_grid = ifelse(prob_set > 0.5, 1, 0)
+y_grid = predict(classifier, newdata = grid_set, type = 'class')
 plot(set[, -3],
-     main = 'SVM (Training Set)',
+     main = 'Random Forest Classifier  (Test Set)',
      xlab = 'Age',
      ylab = 'Estimated Salary',
      xlim = range(X1),
@@ -88,3 +89,17 @@ plot(set[, -3],
 contour(X1, X2, matrix(as.numeric(y_grid),length(X1), length(X2)), add = TRUE)
 points(grid_set, pch = '.', col = ifelse(y_grid==1, 'springgreen3', 'tomato') )
 points(set, pch = 21, bg = ifelse(set[, 3]== 1, 'green4', 'red3'))
+
+## 3.0 Plotando a Random Forest ----
+df$Purchased <- factor(df$Purchased, levels = c(0,1))
+
+split = sample.split(df$Purchased, SplitRatio = .75)
+training_set <- subset(df, split == TRUE)
+test_set <- subset(df, split == F)
+
+classifier = rpart::rpart(formula = Purchased ~.,
+                          data = training_set)
+summary(classifier)
+
+plot(classifier)
+text(classifier)

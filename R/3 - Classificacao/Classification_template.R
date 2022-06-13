@@ -41,9 +41,12 @@ colnames(test_set_ren)[4] <- predicted_column_name
 ## 2.3 Resultados ----
 
 ### 2.3.1 Fazendo a matrix de confusão
-cm_table <- test_set_full[, -2:-1]
-cm = table(test_set[,3], y_pred)
-cm
+# cm_table <- test_set_full[, -2:-1]
+# cm = table(test_set[,3], y_pred)
+# cm
+
+## Matrix de confusao e mais algumas medidas avaliando performance do modelo
+caret::confusionMatrix(as.factor(test_set[,3]), y_pred)
 
 ### 2.3.2 Visualizando resultados
 #### Usando set de treino
@@ -53,10 +56,11 @@ X1 = seq(min(set[, 1]) -1, max(set[, 1]) + 1, by = 0.01)
 X2 = seq(min(set[, 2]) -1, max(set[, 2]) + 1, by = 0.01)
 grid_set = expand.grid(X1, X2)
 colnames(grid_set) = c('Age', 'EstimatedSalary')
-prob_set = predict(classifier, type = 'response', newdata = grid_set)
-y_grid = ifelse(prob_set > 0.5, 1, 0)
+# prob_set = predict(classifier, type = 'response', newdata = grid_set)
+# y_grid = ifelse(prob_set > 0.5, 1, 0)
+y_grid = predict(classifier, newdata = grid_set)
 plot(set[, -3],
-     main = 'SVM (Training Set)',
+     main = 'Model (Training Set)',
      xlab = 'Age',
      ylab = 'Estimated Salary',
      xlim = range(X1),
@@ -73,10 +77,11 @@ X1 = seq(min(set[, 1]) -1, max(set[, 1]) + 1, by = 0.01)
 X2 = seq(min(set[, 2]) -1, max(set[, 2]) + 1, by = 0.01)
 grid_set = expand.grid(X1, X2)
 colnames(grid_set) = c('Age', 'EstimatedSalary')
-prob_set = predict(classifier, type = 'response', newdata = grid_set)
-y_grid = ifelse(prob_set > 0.5, 1, 0)
+# prob_set = predict(classifier, type = 'response', newdata = grid_set)
+# y_grid = ifelse(prob_set > 0.5, 1, 0)
+y_grid = predict(classifier, newdata = grid_set)
 plot(set[, -3],
-     main = 'SVM (Training Set)',
+     main = 'Model (Test Set)',
      xlab = 'Age',
      ylab = 'Estimated Salary',
      xlim = range(X1),
