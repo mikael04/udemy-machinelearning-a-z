@@ -59,7 +59,7 @@ colnames(grid_set) = c('Age', 'EstimatedSalary')
 prob_set = predict(classifier_logReg, type = 'response', newdata = grid_set)
 y_grid = ifelse(prob_set > 0.5, 1, 0)
 plot(set[, -3],
-     main = 'SVM (Training Set)',
+     main = 'Logistic Regression',
      xlab = 'Age',
      ylab = 'Estimated Salary',
      xlim = range(X1),
@@ -79,7 +79,7 @@ colnames(grid_set) = c('Age', 'EstimatedSalary')
 prob_set = predict(classifier_logReg, type = 'response', newdata = grid_set)
 y_grid = ifelse(prob_set > 0.5, 1, 0)
 plot(set[, -3],
-     main = 'SVM (Training Set)',
+     main = 'Logistic Regression',
      xlab = 'Age',
      ylab = 'Estimated Salary',
      xlim = range(X1),
