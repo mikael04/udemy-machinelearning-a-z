@@ -1,3 +1,11 @@
+########################################################## #
+#' Script de seleção de modelos
+#' Com uso de busca em diversos modelos (grid search)
+#' 
+#' 27/07/22
+#' Mikael Marin Coletto
+########################################################## #
+
 # 0. Bibliotecas e scripts base ----
 library(dplyr)
 require(ggplot2)

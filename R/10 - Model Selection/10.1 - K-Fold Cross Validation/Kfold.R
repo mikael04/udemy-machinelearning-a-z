@@ -1,3 +1,11 @@
+########################################################## #
+#' Script de seleção de modelos
+#' Com uso de cross validation (K-fold)
+#' 
+#' 27/07/22
+#' Mikael Marin Coletto
+########################################################## #
+
 # 0. Bibliotecas e scripts base ----
 library(dplyr)
 require(ggplot2)
